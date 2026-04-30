@@ -141,23 +141,37 @@
       try {
         const { data } = await fetchGraphQL(query);
 
+        // Equipment
         const eqList = document.getElementById('equipment-list');
         const eqSelect = document.getElementById('equipment-select');
         eqList.innerHTML = '';
         eqSelect.innerHTML = '<option value="">Select...</option>';
         data.equipment.forEach(eq => {
-          eqList.innerHTML += `<li>${eq.name} (${eq.sku}) - ${eq.is_available ? 'Available' : 'In Use'}</li>`;
+          eqList.innerHTML += `
+            <li>
+                <strong>${eq.name}</strong> (${eq.sku}) - ${eq.is_available ? 'Available' : 'In Use'}
+                <br>
+                <button onclick="updateEquipment('${eq.id}')" style="margin-top:5px;">Edit</button>
+                <button onclick="deleteEquipment('${eq.id}')" style="color:red; margin-top:5px;">Delete</button>
+            </li>`;
           if (eq.is_available) {
             eqSelect.innerHTML += `<option value="${eq.id}">${eq.name}</option>`;
           }
         });
 
+        // Crew
         const crewList = document.getElementById('crew-list');
         const crewSelect = document.getElementById('crew-select');
         crewList.innerHTML = '';
         crewSelect.innerHTML = '<option value="">Select...</option>';
         data.crewMembers.forEach(crew => {
-          crewList.innerHTML += `<li>${crew.name} - ${crew.role}</li>`;
+          crewList.innerHTML += `
+            <li>
+                <strong>${crew.name}</strong> - ${crew.role}
+                <br>
+                <button onclick="updateCrew('${crew.id}')" style="margin-top:5px;">Edit</button>
+                <button onclick="deleteCrew('${crew.id}')" style="color:red; margin-top:5px;">Delete</button>
+            </li>`;
           crewSelect.innerHTML += `<option value="${crew.id}">${crew.name}</option>`;
         });
 
@@ -233,6 +247,55 @@
         console.error(err);
         alert('An error occurred while resetting');
       }
+    }
+
+    async function updateCrew(id) {
+        const newName = prompt('Enter new name:');
+        if (!newName) return;
+        const newRole = prompt('Enter new role:');
+        if (!newRole) return;
+        
+        try {
+            const res = await fetch(`/api/crew/${id}`, {
+                method: 'PUT',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ name: newName, role: newRole })
+            });
+            if (res.ok) { loadData(); } else { alert('Failed to update'); }
+        } catch(e) { console.error(e); }
+    }
+
+    async function deleteCrew(id) {
+        if (!confirm('Delete this crew member?')) return;
+        try {
+            const res = await fetch(`/api/crew/${id}`, { method: 'DELETE' });
+            if (res.ok) { loadData(); } else { alert('Failed to delete'); }
+        } catch(e) { console.error(e); }
+    }
+
+    async function updateEquipment(id) {
+        const newName = prompt('Enter new name:');
+        if (!newName) return;
+        const newCat = prompt('Enter new category:');
+        if (!newCat) return;
+        const isAvail = confirm('Is it available? (OK for yes, Cancel for no)');
+        
+        try {
+            const res = await fetch(`/api/equipment/${id}`, {
+                method: 'PUT',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ name: newName, category: newCat, is_available: isAvail })
+            });
+            if (res.ok) { loadData(); } else { alert('Failed to update'); }
+        } catch(e) { console.error(e); }
+    }
+
+    async function deleteEquipment(id) {
+        if (!confirm('Delete this equipment?')) return;
+        try {
+            const res = await fetch(`/api/equipment/${id}`, { method: 'DELETE' });
+            if (res.ok) { loadData(); } else { alert('Failed to delete'); }
+        } catch(e) { console.error(e); }
     }
 
     document.getElementById('reservation-form').addEventListener('submit', async (e) => {
