@@ -65,6 +65,23 @@ erDiagram
     }
 ```
 
+## System Architecture
+
+```mermaid
+graph TD
+    Client[Web Client UI] -->|HTTP/REST| REST[REST Router]
+    Client -->|GraphQL/POST| GQL[Apollo GraphQL Server]
+
+    REST --> Service[Service Layer]
+    GQL --> Service
+
+    Service -->|Database Queries| SQL[(Azure SQL Serverless)]
+    Service -->|Fetch| ThirdParty[Nager.Date API]
+
+    classDef db fill:#f9f,stroke:#333,stroke-width:2px;
+    class SQL db;
+```
+
 ## Local Setup Instructions
 
 1. **Clone the repository:**
