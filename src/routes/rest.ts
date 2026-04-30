@@ -28,12 +28,38 @@ router.get('/crew', async (req, res) => {
   }
 });
 
+router.get('/crew/:id', async (req, res) => {
+  try {
+    const pool = await getConnection();
+    const result = await pool.request()
+      .input('id', sql.UniqueIdentifier, req.params.id)
+      .query('SELECT * FROM CrewMembers WHERE id = @id');
+    if (result.recordset.length === 0) return res.status(404).json({ error: 'Not found' });
+    res.json(result.recordset[0]);
+  } catch (err) {
+    res.status(500).json({ error: 'Database error' });
+  }
+});
+
 // --- EQUIPMENT ---
 router.get('/equipment', async (req, res) => {
   try {
     const pool = await getConnection();
     const result = await pool.request().query('SELECT * FROM Equipment');
     res.json(result.recordset);
+  } catch (err) {
+    res.status(500).json({ error: 'Database error' });
+  }
+});
+
+router.get('/equipment/:id', async (req, res) => {
+  try {
+    const pool = await getConnection();
+    const result = await pool.request()
+      .input('id', sql.UniqueIdentifier, req.params.id)
+      .query('SELECT * FROM Equipment WHERE id = @id');
+    if (result.recordset.length === 0) return res.status(404).json({ error: 'Not found' });
+    res.json(result.recordset[0]);
   } catch (err) {
     res.status(500).json({ error: 'Database error' });
   }
