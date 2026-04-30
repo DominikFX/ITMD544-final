@@ -3,8 +3,8 @@
 
 A backend GraphQL API for managing a professional audio/visual equipment vault. This project is the first part that will be used for the final assignment that is deployed to azure. This project focuses on cloud deployment, and direct database integration using Node.js and Azure SQL.
 
-**Live GraphQL API:** [https://itmd544-apidev-h9f0h3gderesc3b0.westus3-01.azurewebsites.net/graphql](https://itmd544-apidev-h9f0h3gderesc3b0.westus3-01.azurewebsites.net/graphql)  
-**GitHub Repository:** [https://github.com/DominikFX/ITMD544-api-dev](https://github.com/DominikFX/ITMD544-api-dev)
+**Live GraphQL API:** [itmd544final-b5fcg7aneggfenct.westus3-01.azurewebsites.net](itmd544final-b5fcg7aneggfenct.westus3-01.azurewebsites.net)  
+**GitHub Repository:** [https://github.com/DominikFX/ITMD544-final](https://github.com/DominikFX/ITMD544-final)
 
 ## Features & Implementation (Phases 1 & 3)
 
