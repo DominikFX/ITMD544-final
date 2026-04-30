@@ -250,52 +250,52 @@
     }
 
     async function updateCrew(id) {
-        const newName = prompt('Enter new name:');
-        if (!newName) return;
-        const newRole = prompt('Enter new role:');
-        if (!newRole) return;
-        
-        try {
-            const res = await fetch(`/api/crew/${id}`, {
-                method: 'PUT',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ name: newName, role: newRole })
-            });
-            if (res.ok) { loadData(); } else { alert('Failed to update'); }
-        } catch(e) { console.error(e); }
+      const newName = prompt('Enter new name:');
+      if (!newName) return;
+      const newRole = prompt('Enter new role:');
+      if (!newRole) return;
+
+      try {
+        const res = await fetch(`/api/crew/${id}`, {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ name: newName, role: newRole })
+        });
+        if (res.ok) { loadData(); } else { alert('Failed to update'); }
+      } catch (e) { console.error(e); }
     }
 
     async function deleteCrew(id) {
-        if (!confirm('Delete this crew member?')) return;
-        try {
-            const res = await fetch(`/api/crew/${id}`, { method: 'DELETE' });
-            if (res.ok) { loadData(); } else { alert('Failed to delete'); }
-        } catch(e) { console.error(e); }
+      if (!confirm('Delete this crew member?')) return;
+      try {
+        const res = await fetch(`/api/crew/${id}`, { method: 'DELETE' });
+        if (res.ok) { loadData(); } else { alert('Failed to delete'); }
+      } catch (e) { console.error(e); }
     }
 
     async function updateEquipment(id) {
-        const newName = prompt('Enter new name:');
-        if (!newName) return;
-        const newCat = prompt('Enter new category:');
-        if (!newCat) return;
-        const isAvail = confirm('Is it available? (OK for yes, Cancel for no)');
-        
-        try {
-            const res = await fetch(`/api/equipment/${id}`, {
-                method: 'PUT',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ name: newName, category: newCat, is_available: isAvail })
-            });
-            if (res.ok) { loadData(); } else { alert('Failed to update'); }
-        } catch(e) { console.error(e); }
+      const newName = prompt('Enter new name:');
+      if (!newName) return;
+      const newCat = prompt('Enter new category:');
+      if (!newCat) return;
+      const isAvail = confirm('Is it available? (OK for yes, Cancel for no)');
+
+      try {
+        const res = await fetch(`/api/equipment/${id}`, {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ name: newName, category: newCat, is_available: isAvail })
+        });
+        if (res.ok) { loadData(); } else { alert('Failed to update'); }
+      } catch (e) { console.error(e); }
     }
 
     async function deleteEquipment(id) {
-        if (!confirm('Delete this equipment?')) return;
-        try {
-            const res = await fetch(`/api/equipment/${id}`, { method: 'DELETE' });
-            if (res.ok) { loadData(); } else { alert('Failed to delete'); }
-        } catch(e) { console.error(e); }
+      if (!confirm('Delete this equipment?')) return;
+      try {
+        const res = await fetch(`/api/equipment/${id}`, { method: 'DELETE' });
+        if (res.ok) { loadData(); } else { alert('Failed to delete'); }
+      } catch (e) { console.error(e); }
     }
 
     document.getElementById('reservation-form').addEventListener('submit', async (e) => {

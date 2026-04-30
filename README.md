@@ -56,6 +56,8 @@ erDiagram
         VARCHAR event_venue
         VARCHAR status
         UNIQUEIDENTIFIER crew_id FK
+        BIT requires_holiday_pay
+        VARCHAR desk_closed_warning
     }
     ReservationEquipment {
         UNIQUEIDENTIFIER reservation_id PK, FK
