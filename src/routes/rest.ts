@@ -12,9 +12,53 @@ router.get('/', (req, res) => {
     endpoints: {
       crew: '/api/crew',
       equipment: '/api/equipment',
-      reservations: '/api/reservations'
+      reservations: '/api/reservations',
+      reset: '/api/reset'
     }
   });
+});
+
+// --- SEED / RESET DB ---
+router.post('/reset', async (req, res) => {
+  const pool = await getConnection();
+  const transaction = new sql.Transaction(pool);
+
+  try {
+    await transaction.begin();
+    const request = transaction.request();
+
+    // Clear data
+    await request.query(`
+      DELETE FROM ReservationEquipment;
+      DELETE FROM Reservations;
+      DELETE FROM Equipment;
+      DELETE FROM CrewMembers;
+    `);
+
+    // Seed Crew
+    await request.query(`
+      INSERT INTO CrewMembers (email, name, role) VALUES 
+      ('chris@avvault.com', 'Christopher Nolan', 'Director'),
+      ('hans@avvault.com', 'Hans Zimmer', 'Audio Engineer'),
+      ('roger@avvault.com', 'Roger Deakins', 'Cinematographer');
+    `);
+
+    // Seed Equipment
+    await request.query(`
+      INSERT INTO Equipment (sku, name, category, is_available) VALUES 
+      ('CAM-RED-01', 'RED Komodo 6K Cinema Camera', 'Camera', 1),
+      ('CAM-ARRI-01', 'ARRI Alexa Mini LF', 'Camera', 1),
+      ('LENS-SIG-01', 'Sigma 18-35mm T2 Cine Lens', 'Lens', 1),
+      ('AUD-ROD-01', 'Rode NTG4+ Shotgun Microphone', 'Audio', 1),
+      ('LIG-APE-01', 'Aputure LS 600d Pro LED Light', 'Lighting', 1);
+    `);
+
+    await transaction.commit();
+    res.json({ message: 'Database wiped and seeded with realistic dummy data!' });
+  } catch (err) {
+    if (transaction) await transaction.rollback();
+    res.status(500).json({ error: 'Database reset failed', details: (err as any).message });
+  }
 });
 
 // --- CREW MEMBERS ---

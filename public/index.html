@@ -1,118 +1,134 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>A/V Equipment Vault</title>
-    <style>
-        body {
-            font-family: sans-serif;
-            max-width: 800px;
-            margin: 0 auto;
-            padding: 20px;
-        }
-        .container {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 20px;
-        }
-        .section {
-            border: 1px solid #ccc;
-            padding: 15px;
-            flex: 1;
-            min-width: 300px;
-        }
-        ul {
-            list-style: none;
-            padding: 0;
-        }
-        li {
-            border-bottom: 1px solid #eee;
-            padding: 8px 0;
-        }
-        .warning-box {
-            display: none;
-            border: 1px solid red;
-            color: red;
-            padding: 10px;
-            margin-bottom: 15px;
-        }
-        .form-group {
-            margin-bottom: 10px;
-        }
-        label {
-            display: inline-block;
-            width: 120px;
-        }
-    </style>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>A/V Equipment Vault</title>
+  <style>
+    body {
+      font-family: sans-serif;
+      max-width: 800px;
+      margin: 0 auto;
+      padding: 20px;
+    }
+
+    .container {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 20px;
+    }
+
+    .section {
+      border: 1px solid #ccc;
+      padding: 15px;
+      flex: 1;
+      min-width: 300px;
+    }
+
+    ul {
+      list-style: none;
+      padding: 0;
+    }
+
+    li {
+      border-bottom: 1px solid #eee;
+      padding: 8px 0;
+    }
+
+    .warning-box {
+      display: none;
+      border: 1px solid red;
+      color: red;
+      padding: 10px;
+      margin-bottom: 15px;
+    }
+
+    .form-group {
+      margin-bottom: 10px;
+    }
+
+    label {
+      display: inline-block;
+      width: 120px;
+    }
+  </style>
 </head>
+
 <body>
 
-    <h1>A/V Equipment Vault</h1>
-    <p>Client Interface</p>
-    
-    <div class="container">
-        <!-- Form Section -->
-        <div class="section">
-            <h2>Create Reservation</h2>
-            <div id="holiday-alert" class="warning-box"></div>
-            
-            <form id="reservation-form">
-                <div class="form-group">
-                    <label>Crew Member:</label>
-                    <select id="crew-select" required><option value="">Select...</option></select>
-                </div>
-                <div class="form-group">
-                    <label>Equipment:</label>
-                    <select id="equipment-select" required><option value="">Select...</option></select>
-                </div>
-                <div class="form-group">
-                    <label>Checkout Date:</label>
-                    <input type="datetime-local" id="checkout-date" required>
-                </div>
-                <div class="form-group">
-                    <label>Return Date:</label>
-                    <input type="datetime-local" id="return-date" required>
-                </div>
-                <div class="form-group">
-                    <label>Event Venue:</label>
-                    <input type="text" id="venue" required>
-                </div>
-                <button type="submit">Submit Reservation</button>
-            </form>
-        </div>
+  <h1>A/V Equipment Vault</h1>
+  <p>Client Interface</p>
+  <button onclick="resetDatabase()"
+    style="background-color: red; color: white; padding: 10px; margin-bottom: 20px; border: none; cursor: pointer;">Reset
+    & Seed Database</button>
 
-        <!-- Data Section -->
-        <div class="section">
-            <h2>Active Reservations</h2>
-            <ul id="reservations-list"></ul>
-        </div>
-        
-        <div class="section">
-            <h2>Equipment</h2>
-            <ul id="equipment-list"></ul>
-        </div>
+  <div class="container">
+    <!-- Form Section -->
+    <div class="section">
+      <h2>Create Reservation</h2>
+      <div id="holiday-alert" class="warning-box"></div>
 
-        <div class="section">
-            <h2>Crew</h2>
-            <ul id="crew-list"></ul>
+      <form id="reservation-form">
+        <div class="form-group">
+          <label>Crew Member:</label>
+          <select id="crew-select" required>
+            <option value="">Select...</option>
+          </select>
         </div>
+        <div class="form-group">
+          <label>Equipment:</label>
+          <select id="equipment-select" required>
+            <option value="">Select...</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>Checkout Date:</label>
+          <input type="datetime-local" id="checkout-date" required>
+        </div>
+        <div class="form-group">
+          <label>Return Date:</label>
+          <input type="datetime-local" id="return-date" required>
+        </div>
+        <div class="form-group">
+          <label>Event Venue:</label>
+          <input type="text" id="venue" required>
+        </div>
+        <button type="submit">Submit Reservation</button>
+      </form>
     </div>
 
-    <script>
-        const GRAPHQL_URL = '/graphql';
+    <!-- Data Section -->
+    <div class="section">
+      <h2>Active Reservations</h2>
+      <ul id="reservations-list"></ul>
+    </div>
 
-        async function fetchGraphQL(query, variables = {}) {
-            const res = await fetch(GRAPHQL_URL, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ query, variables })
-            });
-            return res.json();
-        }
+    <div class="section">
+      <h2>Equipment</h2>
+      <ul id="equipment-list"></ul>
+    </div>
 
-        async function loadData() {
-            const query = `
+    <div class="section">
+      <h2>Crew</h2>
+      <ul id="crew-list"></ul>
+    </div>
+  </div>
+
+  <script>
+    const GRAPHQL_URL = '/graphql';
+
+    async function fetchGraphQL(query, variables = {}) {
+      const res = await fetch(GRAPHQL_URL, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ query, variables })
+      });
+      return res.json();
+    }
+
+    async function loadData() {
+      const query = `
                 query {
                     equipment { id name sku category is_available }
                     crewMembers { id name role }
@@ -124,39 +140,39 @@
                     }
                 }
             `;
-            
-            try {
-                const { data } = await fetchGraphQL(query);
-                
-                // Equipment
-                const eqList = document.getElementById('equipment-list');
-                const eqSelect = document.getElementById('equipment-select');
-                eqList.innerHTML = '';
-                eqSelect.innerHTML = '<option value="">Select...</option>';
-                data.equipment.forEach(eq => {
-                    eqList.innerHTML += `<li>${eq.name} (${eq.sku}) - ${eq.is_available ? 'Available' : 'In Use'}</li>`;
-                    if (eq.is_available) {
-                        eqSelect.innerHTML += `<option value="${eq.id}">${eq.name}</option>`;
-                    }
-                });
 
-                // Crew
-                const crewList = document.getElementById('crew-list');
-                const crewSelect = document.getElementById('crew-select');
-                crewList.innerHTML = '';
-                crewSelect.innerHTML = '<option value="">Select...</option>';
-                data.crewMembers.forEach(crew => {
-                    crewList.innerHTML += `<li>${crew.name} - ${crew.role}</li>`;
-                    crewSelect.innerHTML += `<option value="${crew.id}">${crew.name}</option>`;
-                });
+      try {
+        const { data } = await fetchGraphQL(query);
 
-                // Reservations
-                const resList = document.getElementById('reservations-list');
-                resList.innerHTML = '';
-                data.reservations.forEach(res => {
-                    const eqNames = res.equipment.map(e => e.name).join(', ');
-                    let warning = res.requires_holiday_pay ? `<br><small style="color:red;">⚠️ ${res.desk_closed_warning}</small>` : '';
-                    resList.innerHTML += `
+        // Equipment
+        const eqList = document.getElementById('equipment-list');
+        const eqSelect = document.getElementById('equipment-select');
+        eqList.innerHTML = '';
+        eqSelect.innerHTML = '<option value="">Select...</option>';
+        data.equipment.forEach(eq => {
+          eqList.innerHTML += `<li>${eq.name} (${eq.sku}) - ${eq.is_available ? 'Available' : 'In Use'}</li>`;
+          if (eq.is_available) {
+            eqSelect.innerHTML += `<option value="${eq.id}">${eq.name}</option>`;
+          }
+        });
+
+        // Crew
+        const crewList = document.getElementById('crew-list');
+        const crewSelect = document.getElementById('crew-select');
+        crewList.innerHTML = '';
+        crewSelect.innerHTML = '<option value="">Select...</option>';
+        data.crewMembers.forEach(crew => {
+          crewList.innerHTML += `<li>${crew.name} - ${crew.role}</li>`;
+          crewSelect.innerHTML += `<option value="${crew.id}">${crew.name}</option>`;
+        });
+
+        // Reservations
+        const resList = document.getElementById('reservations-list');
+        resList.innerHTML = '';
+        data.reservations.forEach(res => {
+          const eqNames = res.equipment.map(e => e.name).join(', ');
+          let warning = res.requires_holiday_pay ? `<br><small style="color:red;">${res.desk_closed_warning}</small>` : '';
+          resList.innerHTML += `
                         <li>
                             <strong>${res.event_venue}</strong> (${res.status})
                             <button onclick="updateReservationStatus('${res.id}')" style="margin-left: 10px;">Complete</button>
@@ -167,16 +183,16 @@
                             ${warning}
                         </li>
                     `;
-                });
+        });
 
-            } catch (err) {
-                console.error("Error loading data:", err);
-            }
-        }
+      } catch (err) {
+        console.error("Error loading data:", err);
+      }
+    }
 
-        async function updateReservationStatus(id) {
-            try {
-                const res = await fetch(\`/api/reservations/\${id}\`, {
+    async function updateReservationStatus(id) {
+      try {
+        const res = await fetch(\`/api/reservations/\${id}\`, {
                     method: 'PUT',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ status: 'Completed' })
@@ -209,6 +225,22 @@
             }
         }
 
+        async function resetDatabase() {
+            if (!confirm('WARNING: This will wipe all current data and reset the database with default dummy data. Proceed?')) return;
+            try {
+                const res = await fetch('/api/reset', { method: 'POST' });
+                if (res.ok) {
+                    alert('Database successfully wiped and seeded with default data!');
+                    loadData(); // Refresh UI
+                } else {
+                    alert('Failed to reset database');
+                }
+            } catch (err) {
+                console.error(err);
+                alert('An error occurred while resetting');
+            }
+        }
+
         document.getElementById('reservation-form').addEventListener('submit', async (e) => {
             e.preventDefault();
             
@@ -217,15 +249,15 @@
             
             const mutation = `
                 mutation($crew_id: ID!, $equipment_ids: [ID!]!, $checkout_date: String!, $return_date: String!, $event_venue: String!) {
-                    createReservation(
-                        crew_id: $crew_id,
-                        equipment_ids: $equipment_ids,
-                        checkout_date: $checkout_date,
-                        return_date: $return_date,
-                        event_venue: $event_venue,
-                        status: "Pending"
-                    ) { id requires_holiday_pay desk_closed_warning }
-                }
+          createReservation(
+            crew_id: $crew_id,
+            equipment_ids: $equipment_ids,
+            checkout_date: $checkout_date,
+            return_date: $return_date,
+            event_venue: $event_venue,
+            status: "Pending"
+          ) { id requires_holiday_pay desk_closed_warning }
+        }
             `;
 
             try {
@@ -244,7 +276,7 @@
 
                 const data = res.data.createReservation;
                 const alertBox = document.getElementById('holiday-alert');
-                
+
                 if (data.requires_holiday_pay) {
                     alertBox.style.display = 'block';
                     alertBox.innerText = data.desk_closed_warning;
@@ -262,6 +294,7 @@
         });
 
         loadData();
-    </script>
+  </script>
 </body>
+
 </html>
