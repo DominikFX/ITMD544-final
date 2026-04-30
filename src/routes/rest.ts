@@ -41,6 +41,50 @@ router.get('/crew/:id', async (req, res) => {
   }
 });
 
+router.post('/crew', async (req, res) => {
+  const { email, name, role } = req.body;
+  try {
+    const pool = await getConnection();
+    const result = await pool.request()
+      .input('email', sql.VarChar(255), email)
+      .input('name', sql.VarChar(255), name)
+      .input('role', sql.VarChar(100), role)
+      .query('INSERT INTO CrewMembers (email, name, role) OUTPUT INSERTED.* VALUES (@email, @name, @role)');
+    res.status(201).json(result.recordset[0]);
+  } catch (err) {
+    res.status(500).json({ error: 'Database error' });
+  }
+});
+
+router.put('/crew/:id', async (req, res) => {
+  const { name, role } = req.body;
+  try {
+    const pool = await getConnection();
+    const result = await pool.request()
+      .input('id', sql.UniqueIdentifier, req.params.id)
+      .input('name', sql.VarChar(255), name)
+      .input('role', sql.VarChar(100), role)
+      .query('UPDATE CrewMembers SET name = @name, role = @role OUTPUT INSERTED.* WHERE id = @id');
+    if (result.recordset.length === 0) return res.status(404).json({ error: 'Not found' });
+    res.json(result.recordset[0]);
+  } catch (err) {
+    res.status(500).json({ error: 'Database error' });
+  }
+});
+
+router.delete('/crew/:id', async (req, res) => {
+  try {
+    const pool = await getConnection();
+    const result = await pool.request()
+      .input('id', sql.UniqueIdentifier, req.params.id)
+      .query('DELETE FROM CrewMembers WHERE id = @id');
+    if ((result.rowsAffected?.[0] ?? 0) === 0) return res.status(404).json({ error: 'Not found' });
+    res.json({ message: 'Deleted successfully' });
+  } catch (err) {
+    res.status(500).json({ error: 'Database error' });
+  }
+});
+
 // --- EQUIPMENT ---
 router.get('/equipment', async (req, res) => {
   try {
@@ -60,6 +104,51 @@ router.get('/equipment/:id', async (req, res) => {
       .query('SELECT * FROM Equipment WHERE id = @id');
     if (result.recordset.length === 0) return res.status(404).json({ error: 'Not found' });
     res.json(result.recordset[0]);
+  } catch (err) {
+    res.status(500).json({ error: 'Database error' });
+  }
+});
+
+router.post('/equipment', async (req, res) => {
+  const { sku, name, category } = req.body;
+  try {
+    const pool = await getConnection();
+    const result = await pool.request()
+      .input('sku', sql.VarChar(100), sku)
+      .input('name', sql.VarChar(255), name)
+      .input('category', sql.VarChar(100), category)
+      .query('INSERT INTO Equipment (sku, name, category) OUTPUT INSERTED.* VALUES (@sku, @name, @category)');
+    res.status(201).json(result.recordset[0]);
+  } catch (err) {
+    res.status(500).json({ error: 'Database error' });
+  }
+});
+
+router.put('/equipment/:id', async (req, res) => {
+  const { name, category, is_available } = req.body;
+  try {
+    const pool = await getConnection();
+    const result = await pool.request()
+      .input('id', sql.UniqueIdentifier, req.params.id)
+      .input('name', sql.VarChar(255), name)
+      .input('category', sql.VarChar(100), category)
+      .input('is_available', sql.Bit, is_available ? 1 : 0)
+      .query('UPDATE Equipment SET name = @name, category = @category, is_available = @is_available OUTPUT INSERTED.* WHERE id = @id');
+    if (result.recordset.length === 0) return res.status(404).json({ error: 'Not found' });
+    res.json(result.recordset[0]);
+  } catch (err) {
+    res.status(500).json({ error: 'Database error' });
+  }
+});
+
+router.delete('/equipment/:id', async (req, res) => {
+  try {
+    const pool = await getConnection();
+    const result = await pool.request()
+      .input('id', sql.UniqueIdentifier, req.params.id)
+      .query('DELETE FROM Equipment WHERE id = @id');
+    if ((result.rowsAffected?.[0] ?? 0) === 0) return res.status(404).json({ error: 'Not found' });
+    res.json({ message: 'Deleted successfully' });
   } catch (err) {
     res.status(500).json({ error: 'Database error' });
   }
