@@ -58,13 +58,11 @@
 <body>
 
   <h1>A/V Equipment Vault</h1>
-  <p>Client Interface</p>
   <button onclick="resetDatabase()"
     style="background-color: red; color: white; padding: 10px; margin-bottom: 20px; border: none; cursor: pointer;">Reset
     & Seed Database</button>
 
   <div class="container">
-    <!-- Form Section -->
     <div class="section">
       <h2>Create Reservation</h2>
       <div id="holiday-alert" class="warning-box"></div>
@@ -98,7 +96,6 @@
       </form>
     </div>
 
-    <!-- Data Section -->
     <div class="section">
       <h2>Active Reservations</h2>
       <ul id="reservations-list"></ul>
@@ -144,7 +141,6 @@
       try {
         const { data } = await fetchGraphQL(query);
 
-        // Equipment
         const eqList = document.getElementById('equipment-list');
         const eqSelect = document.getElementById('equipment-select');
         eqList.innerHTML = '';
@@ -156,7 +152,6 @@
           }
         });
 
-        // Crew
         const crewList = document.getElementById('crew-list');
         const crewSelect = document.getElementById('crew-select');
         crewList.innerHTML = '';
@@ -166,7 +161,6 @@
           crewSelect.innerHTML += `<option value="${crew.id}">${crew.name}</option>`;
         });
 
-        // Reservations
         const resList = document.getElementById('reservations-list');
         resList.innerHTML = '';
         data.reservations.forEach(res => {
@@ -193,61 +187,61 @@
     async function updateReservationStatus(id) {
       try {
         const res = await fetch(`/api/reservations/${id}`, {
-            method: 'PUT',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ status: 'Completed' })
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ status: 'Completed' })
         });
         if (res.ok) {
-            alert('Status updated to Completed!');
-            loadData();
+          alert('Status updated to Completed!');
+          loadData();
         } else {
-            alert('Failed to update status');
+          alert('Failed to update status');
         }
       } catch (err) {
-          console.error(err);
+        console.error(err);
       }
     }
 
     async function deleteReservation(id) {
-        if (!confirm('Are you sure you want to delete this reservation?')) return;
-        try {
-            const res = await fetch(`/api/reservations/${id}`, {
-                method: 'DELETE'
-            });
-            if (res.ok) {
-                alert('Reservation deleted!');
-                loadData();
-            } else {
-                alert('Failed to delete reservation');
-            }
-        } catch (err) {
-            console.error(err);
+      if (!confirm('Are you sure you want to delete this reservation?')) return;
+      try {
+        const res = await fetch(`/api/reservations/${id}`, {
+          method: 'DELETE'
+        });
+        if (res.ok) {
+          alert('Reservation deleted!');
+          loadData();
+        } else {
+          alert('Failed to delete reservation');
         }
+      } catch (err) {
+        console.error(err);
+      }
     }
 
-        async function resetDatabase() {
-            if (!confirm('WARNING: This will wipe all current data and reset the database with default dummy data. Proceed?')) return;
-            try {
-                const res = await fetch('/api/reset', { method: 'POST' });
-                if (res.ok) {
-                    alert('Database successfully wiped and seeded with default data!');
-                    loadData(); // Refresh UI
-                } else {
-                    alert('Failed to reset database');
-                }
-            } catch (err) {
-                console.error(err);
-                alert('An error occurred while resetting');
-            }
+    async function resetDatabase() {
+      if (!confirm('WARNING: This will wipe all current data and reset the database with default dummy data. Proceed?')) return;
+      try {
+        const res = await fetch('/api/reset', { method: 'POST' });
+        if (res.ok) {
+          alert('Database successfully wiped and seeded with default data!');
+          loadData();
+        } else {
+          alert('Failed to reset database');
         }
+      } catch (err) {
+        console.error(err);
+        alert('An error occurred while resetting');
+      }
+    }
 
-        document.getElementById('reservation-form').addEventListener('submit', async (e) => {
-            e.preventDefault();
-            
-            const crewId = document.getElementById('crew-select').value;
-            const eqId = document.getElementById('equipment-select').value;
-            
-            const mutation = `
+    document.getElementById('reservation-form').addEventListener('submit', async (e) => {
+      e.preventDefault();
+
+      const crewId = document.getElementById('crew-select').value;
+      const eqId = document.getElementById('equipment-select').value;
+
+      const mutation = `
                 mutation($crew_id: ID!, $equipment_ids: [ID!]!, $checkout_date: String!, $return_date: String!, $event_venue: String!) {
           createReservation(
             crew_id: $crew_id,
@@ -260,40 +254,40 @@
         }
             `;
 
-            try {
-                const res = await fetchGraphQL(mutation, {
-                    crew_id: crewId,
-                    equipment_ids: [eqId],
-                    checkout_date: new Date(document.getElementById('checkout-date').value).toISOString(),
-                    return_date: new Date(document.getElementById('return-date').value).toISOString(),
-                    event_venue: document.getElementById('venue').value
-                });
-
-                if (res.errors) {
-                    alert('Error: ' + res.errors[0].message);
-                    return;
-                }
-
-                const data = res.data.createReservation;
-                const alertBox = document.getElementById('holiday-alert');
-
-                if (data.requires_holiday_pay) {
-                    alertBox.style.display = 'block';
-                    alertBox.innerText = data.desk_closed_warning;
-                } else {
-                    alertBox.style.display = 'none';
-                    alert('Reservation created successfully!');
-                }
-
-                document.getElementById('reservation-form').reset();
-                loadData();
-            } catch (err) {
-                console.error(err);
-                alert('Failed to submit');
-            }
+      try {
+        const res = await fetchGraphQL(mutation, {
+          crew_id: crewId,
+          equipment_ids: [eqId],
+          checkout_date: new Date(document.getElementById('checkout-date').value).toISOString(),
+          return_date: new Date(document.getElementById('return-date').value).toISOString(),
+          event_venue: document.getElementById('venue').value
         });
 
+        if (res.errors) {
+          alert('Error: ' + res.errors[0].message);
+          return;
+        }
+
+        const data = res.data.createReservation;
+        const alertBox = document.getElementById('holiday-alert');
+
+        if (data.requires_holiday_pay) {
+          alertBox.style.display = 'block';
+          alertBox.innerText = data.desk_closed_warning;
+        } else {
+          alertBox.style.display = 'none';
+          alert('Reservation created successfully!');
+        }
+
+        document.getElementById('reservation-form').reset();
         loadData();
+      } catch (err) {
+        console.error(err);
+        alert('Failed to submit');
+      }
+    });
+
+    loadData();
   </script>
 </body>
 

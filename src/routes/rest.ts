@@ -53,6 +53,21 @@ router.post('/reset', async (req, res) => {
       ('LIG-APE-01', 'Aputure LS 600d Pro LED Light', 'Lighting', 1);
     `);
 
+    // Seed Reservation
+    await request.query(`
+      DECLARE @CrewId UNIQUEIDENTIFIER = (SELECT TOP 1 id FROM CrewMembers);
+      DECLARE @EqId UNIQUEIDENTIFIER = (SELECT TOP 1 id FROM Equipment);
+      
+      DECLARE @ResId TABLE (id UNIQUEIDENTIFIER);
+
+      INSERT INTO Reservations (checkout_date, return_date, event_venue, status, crew_id, requires_holiday_pay, desk_closed_warning) 
+      OUTPUT INSERTED.id INTO @ResId
+      VALUES (GETDATE(), DATEADD(day, 2, GETDATE()), 'Hermann Hall Aud', 'Pending', @CrewId, 0, NULL);
+
+      INSERT INTO ReservationEquipment (reservation_id, equipment_id)
+      SELECT id, @EqId FROM @ResId;
+    `);
+
     await transaction.commit();
     res.json({ message: 'Database wiped and seeded with realistic dummy data!' });
   } catch (err) {
