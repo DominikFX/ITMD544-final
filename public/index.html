@@ -1,0 +1,437 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>A/V Equipment Vault</title>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;800&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-color: #0f172a;
+            --text-color: #f8fafc;
+            --card-bg: rgba(30, 41, 59, 0.7);
+            --card-border: rgba(255, 255, 255, 0.1);
+            --accent-color: #3b82f6;
+            --accent-hover: #60a5fa;
+            --danger-color: #ef4444;
+            --warning-color: #f59e0b;
+        }
+
+        body {
+            font-family: 'Outfit', sans-serif;
+            background: radial-gradient(circle at top left, #1e1b4b, var(--bg-color));
+            color: var(--text-color);
+            margin: 0;
+            padding: 0;
+            min-height: 100vh;
+        }
+
+        header {
+            padding: 2rem;
+            text-align: center;
+            background: rgba(15, 23, 42, 0.8);
+            backdrop-filter: blur(10px);
+            border-bottom: 1px solid var(--card-border);
+            box-shadow: 0 4px 30px rgba(0, 0, 0, 0.5);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        h1 {
+            margin: 0;
+            font-size: 2.5rem;
+            background: linear-gradient(90deg, #60a5fa, #a78bfa);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 2rem auto;
+            padding: 0 1rem;
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 2rem;
+        }
+
+        .card {
+            background: var(--card-bg);
+            border: 1px solid var(--card-border);
+            border-radius: 16px;
+            padding: 2rem;
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            box-shadow: 0 4px 30px rgba(0, 0, 0, 0.3);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 40px rgba(59, 130, 246, 0.2);
+            border-color: rgba(59, 130, 246, 0.4);
+        }
+
+        .card h2 {
+            margin-top: 0;
+            border-bottom: 2px solid var(--card-border);
+            padding-bottom: 0.5rem;
+            font-weight: 600;
+        }
+
+        .data-list {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+            flex-grow: 1;
+            max-height: 300px;
+            overflow-y: auto;
+        }
+
+        .data-list li {
+            padding: 1rem;
+            border-bottom: 1px solid var(--card-border);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: rgba(255, 255, 255, 0.02);
+            margin-bottom: 0.5rem;
+            border-radius: 8px;
+            transition: background 0.2s;
+        }
+
+        .data-list li:hover {
+            background: rgba(255, 255, 255, 0.05);
+        }
+
+        .badge {
+            background: var(--accent-color);
+            padding: 0.25rem 0.75rem;
+            border-radius: 999px;
+            font-size: 0.8rem;
+            font-weight: 600;
+        }
+
+        .badge.warning {
+            background: var(--warning-color);
+            color: #000;
+        }
+
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: rgba(0, 0, 0, 0.1);
+        }
+        ::-webkit-scrollbar-thumb {
+            background: var(--card-border);
+            border-radius: 4px;
+        }
+
+        /* Form Styles */
+        .form-group {
+            margin-bottom: 1rem;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-size: 0.9rem;
+            color: #cbd5e1;
+        }
+
+        input, select {
+            width: 100%;
+            padding: 0.75rem;
+            background: rgba(0, 0, 0, 0.2);
+            border: 1px solid var(--card-border);
+            border-radius: 8px;
+            color: white;
+            font-family: inherit;
+            box-sizing: border-box;
+            transition: border-color 0.2s;
+        }
+
+        input:focus, select:focus {
+            outline: none;
+            border-color: var(--accent-color);
+        }
+
+        button {
+            width: 100%;
+            padding: 1rem;
+            background: linear-gradient(135deg, var(--accent-color), #8b5cf6);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-weight: 600;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: opacity 0.2s, transform 0.1s;
+        }
+
+        button:hover {
+            opacity: 0.9;
+        }
+
+        button:active {
+            transform: scale(0.98);
+        }
+
+        #holiday-alert {
+            display: none;
+            background: rgba(245, 158, 11, 0.1);
+            border: 1px solid var(--warning-color);
+            padding: 1rem;
+            border-radius: 8px;
+            margin-bottom: 1rem;
+            color: var(--warning-color);
+            font-weight: 600;
+        }
+    </style>
+</head>
+<body>
+
+    <header>
+        <h1>A/V Equipment Vault</h1>
+        <p>Professional Media Management System</p>
+    </header>
+
+    <div class="container">
+        <!-- Equipment Card -->
+        <div class="card">
+            <h2>Inventory</h2>
+            <ul id="equipment-list" class="data-list">
+                <li>Loading equipment...</li>
+            </ul>
+        </div>
+
+        <!-- Crew Card -->
+        <div class="card">
+            <h2>Crew Members</h2>
+            <ul id="crew-list" class="data-list">
+                <li>Loading crew...</li>
+            </ul>
+        </div>
+
+        <!-- Create Reservation Card -->
+        <div class="card">
+            <h2>Create Reservation</h2>
+            <div id="holiday-alert"></div>
+            
+            <form id="reservation-form">
+                <div class="form-group">
+                    <label for="crew-select">Crew Member</label>
+                    <select id="crew-select" required>
+                        <option value="">Select Crew...</option>
+                    </select>
+                </div>
+                
+                <div class="form-group">
+                    <label for="equipment-select">Equipment</label>
+                    <select id="equipment-select" required>
+                        <option value="">Select Equipment...</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label for="checkout-date">Checkout Date</label>
+                    <input type="datetime-local" id="checkout-date" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="return-date">Return Date</label>
+                    <input type="datetime-local" id="return-date" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="venue">Event Venue</label>
+                    <input type="text" id="venue" placeholder="e.g. Main Stage" required>
+                </div>
+
+                <button type="submit">Submit Reservation</button>
+            </form>
+        </div>
+
+        <!-- Reservations List Card -->
+        <div class="card" style="grid-column: 1 / -1;">
+            <h2>Active Reservations</h2>
+            <ul id="reservations-list" class="data-list" style="max-height: 400px;">
+                <li>Loading reservations...</li>
+            </ul>
+        </div>
+    </div>
+
+    <script>
+        const GRAPHQL_URL = '/graphql';
+
+        async function fetchGraphQL(query, variables = {}) {
+            const res = await fetch(GRAPHQL_URL, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ query, variables })
+            });
+            return res.json();
+        }
+
+        async function loadData() {
+            const query = `
+                query {
+                    equipment { id name sku category is_available }
+                    crewMembers { id name role }
+                    reservations { 
+                        id event_venue status checkout_date return_date 
+                        requires_holiday_pay desk_closed_warning
+                        crew_member { name }
+                        equipment { name }
+                    }
+                }
+            `;
+            
+            try {
+                const { data } = await fetchGraphQL(query);
+                
+                // Populate Equipment
+                const eqList = document.getElementById('equipment-list');
+                const eqSelect = document.getElementById('equipment-select');
+                eqList.innerHTML = '';
+                eqSelect.innerHTML = '<option value="">Select Equipment...</option>';
+                
+                data.equipment.forEach(eq => {
+                    eqList.innerHTML += `
+                        <li>
+                            <div>
+                                <strong>${eq.name}</strong> <br>
+                                <small>${eq.sku} - ${eq.category}</small>
+                            </div>
+                            <span class="badge" style="background: ${eq.is_available ? 'var(--accent-color)' : 'var(--danger-color)'}">
+                                ${eq.is_available ? 'Available' : 'In Use'}
+                            </span>
+                        </li>
+                    `;
+                    if (eq.is_available) {
+                        eqSelect.innerHTML += `<option value="${eq.id}">${eq.name} (${eq.sku})</option>`;
+                    }
+                });
+
+                // Populate Crew
+                const crewList = document.getElementById('crew-list');
+                const crewSelect = document.getElementById('crew-select');
+                crewList.innerHTML = '';
+                crewSelect.innerHTML = '<option value="">Select Crew...</option>';
+
+                data.crewMembers.forEach(crew => {
+                    crewList.innerHTML += `
+                        <li>
+                            <div><strong>${crew.name}</strong></div>
+                            <span class="badge" style="background: #a78bfa">${crew.role}</span>
+                        </li>
+                    `;
+                    crewSelect.innerHTML += `<option value="${crew.id}">${crew.name} - ${crew.role}</option>`;
+                });
+
+                // Populate Reservations
+                const resList = document.getElementById('reservations-list');
+                resList.innerHTML = '';
+                
+                data.reservations.forEach(res => {
+                    const equipmentNames = res.equipment.map(e => e.name).join(', ');
+                    let warningHtml = '';
+                    if (res.requires_holiday_pay) {
+                        warningHtml = `<div style="color: var(--warning-color); font-size: 0.8rem; margin-top: 0.5rem;">⚠️ Holiday Pay Required: ${res.desk_closed_warning}</div>`;
+                    }
+                    
+                    resList.innerHTML += `
+                        <li style="flex-direction: column; align-items: flex-start; gap: 0.5rem;">
+                            <div style="display: flex; justify-content: space-between; width: 100%;">
+                                <strong>${res.event_venue}</strong>
+                                <span class="badge ${res.status === 'Pending' ? 'warning' : ''}">${res.status}</span>
+                            </div>
+                            <div style="font-size: 0.9rem; color: #cbd5e1;">
+                                👤 ${res.crew_member ? res.crew_member.name : 'Unknown'} | 🎥 ${equipmentNames}
+                            </div>
+                            <div style="font-size: 0.8rem; color: #94a3b8;">
+                                📅 Out: ${new Date(res.checkout_date).toLocaleString()} <br>
+                                📅 In: ${new Date(res.return_date).toLocaleString()}
+                            </div>
+                            ${warningHtml}
+                        </li>
+                    `;
+                });
+
+            } catch (err) {
+                console.error("Error loading data:", err);
+            }
+        }
+
+        document.getElementById('reservation-form').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const crewId = document.getElementById('crew-select').value;
+            const eqId = document.getElementById('equipment-select').value;
+            const checkout = document.getElementById('checkout-date').value;
+            const returnDate = document.getElementById('return-date').value;
+            const venue = document.getElementById('venue').value;
+
+            // Ensure datetime is in ISO string for GraphQL
+            const checkoutIso = new Date(checkout).toISOString();
+            const returnIso = new Date(returnDate).toISOString();
+
+            const mutation = `
+                mutation($crew_id: ID!, $equipment_ids: [ID!]!, $checkout_date: String!, $return_date: String!, $event_venue: String!) {
+                    createReservation(
+                        crew_id: $crew_id,
+                        equipment_ids: $equipment_ids,
+                        checkout_date: $checkout_date,
+                        return_date: $return_date,
+                        event_venue: $event_venue,
+                        status: "Pending"
+                    ) {
+                        id
+                        requires_holiday_pay
+                        desk_closed_warning
+                    }
+                }
+            `;
+
+            try {
+                const res = await fetchGraphQL(mutation, {
+                    crew_id: crewId,
+                    equipment_ids: [eqId],
+                    checkout_date: checkoutIso,
+                    return_date: returnIso,
+                    event_venue: venue
+                });
+
+                if (res.errors) {
+                    alert('Error creating reservation: ' + res.errors[0].message);
+                    return;
+                }
+
+                const data = res.data.createReservation;
+                
+                if (data.requires_holiday_pay) {
+                    const alertBox = document.getElementById('holiday-alert');
+                    alertBox.style.display = 'block';
+                    alertBox.innerText = '✅ Reservation Saved! ' + data.desk_closed_warning;
+                } else {
+                    alert('✅ Reservation Created Successfully!');
+                    document.getElementById('holiday-alert').style.display = 'none';
+                }
+
+                document.getElementById('reservation-form').reset();
+                loadData(); // Refresh all lists
+            } catch (err) {
+                console.error("Submit error:", err);
+                alert('Failed to submit reservation.');
+            }
+        });
+
+        // Initialize
+        loadData();
+    </script>
+</body>
+</html>

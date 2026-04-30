@@ -6,6 +6,8 @@ import { typeDefs } from './graphql/typeDefs';
 import { resolvers } from './graphql/resolvers';
 import dotenv from 'dotenv';
 import { initializeDatabase } from './db/init';
+import path from 'path';
+import restRouter from './routes/rest';
 
 dotenv.config();
 
@@ -19,6 +21,23 @@ async function startServer() {
     process.exit(1);
   }
 
+  // Serve static frontend files under /client
+  app.use('/client', express.static(path.join(__dirname, '../public')));
+
+  // Root endpoint for API status
+  app.get('/', (req, res) => {
+    res.json({
+      name: 'A/V Equipment Vault API',
+      status: 'online',
+      version: '1.0.0',
+      links: {
+        graphql_sandbox: '/graphql',
+        rest_api_base: '/api',
+        frontend_client: '/client'
+      }
+    });
+  });
+
   const server = new ApolloServer({
     typeDefs,
     resolvers,
@@ -28,6 +47,9 @@ async function startServer() {
 
   app.use(cors());
   app.use(express.json());
+
+  // Mount standard REST endpoints
+  app.use('/api', restRouter);
 
   app.use('/graphql', expressMiddleware(server));
 
