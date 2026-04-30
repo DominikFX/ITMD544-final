@@ -1,5 +1,6 @@
 import { getConnection } from '../db/db';
 import sql from 'mssql';
+import { HolidayService } from '../services/HolidayService';
 
 export const resolvers = {
   Query: {
@@ -97,16 +98,30 @@ export const resolvers = {
         const checkout = checkout_date ? new Date(checkout_date) : new Date();
         const returned = new Date(return_date);
 
+        // Check for holidays
+        const checkoutWarning = await HolidayService.getHolidayWarningForDate(checkout);
+        const returnWarning = await HolidayService.getHolidayWarningForDate(returned);
+        
+        let requiresHolidayPay = false;
+        let deskClosedWarning = null;
+        
+        if (checkoutWarning || returnWarning) {
+          requiresHolidayPay = true;
+          deskClosedWarning = [checkoutWarning, returnWarning].filter(Boolean).join(' | ');
+        }
+
         request.input('checkout_date', sql.DateTime, checkout);
         request.input('return_date', sql.DateTime, returned);
         request.input('event_venue', sql.VarChar(255), event_venue);
         request.input('status', sql.VarChar(50), status);
         request.input('crew_id', sql.UniqueIdentifier, crew_id);
+        request.input('requires_holiday_pay', sql.Bit, requiresHolidayPay ? 1 : 0);
+        request.input('desk_closed_warning', sql.VarChar(255), deskClosedWarning);
 
         const resResult = await request.query(`
-          INSERT INTO Reservations (checkout_date, return_date, event_venue, status, crew_id) 
+          INSERT INTO Reservations (checkout_date, return_date, event_venue, status, crew_id, requires_holiday_pay, desk_closed_warning) 
           OUTPUT INSERTED.* 
-          VALUES (@checkout_date, @return_date, @event_venue, @status, @crew_id)
+          VALUES (@checkout_date, @return_date, @event_venue, @status, @crew_id, @requires_holiday_pay, @desk_closed_warning)
         `);
 
         const reservation = resResult.recordset[0];

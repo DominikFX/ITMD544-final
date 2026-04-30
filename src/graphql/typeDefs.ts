@@ -21,6 +21,8 @@ export const typeDefs = `#graphql
     event_venue: String!
     status: String!
     crew_id: ID!
+    requires_holiday_pay: Boolean!
+    desk_closed_warning: String
     crew_member: CrewMember
     equipment: [Equipment!]!
   }

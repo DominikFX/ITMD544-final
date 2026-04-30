@@ -24,31 +24,32 @@ BEGIN
     );
 END
 
--- Reservations Table
-IF OBJECT_ID('Reservations', 'U') IS NULL
-BEGIN
-    CREATE TABLE Reservations (
-        id UNIQUEIDENTIFIER PRIMARY KEY DEFAULT NEWID(),
-        checkout_date DATETIME DEFAULT GETDATE(),
-        return_date DATETIME NOT NULL,
-        event_venue VARCHAR(255) NOT NULL,
-        status VARCHAR(50) NOT NULL,
-        crew_id UNIQUEIDENTIFIER NOT NULL,
-        CONSTRAINT FK_Reservations_Crew FOREIGN KEY (crew_id) REFERENCES CrewMembers(id)
-    );
-END
-
 -- Combo Table
-IF OBJECT_ID('ReservationEquipment', 'U') IS NULL
-BEGIN
-    CREATE TABLE ReservationEquipment (
+IF OBJECT_ID('ReservationEquipment', 'U') IS NOT NULL DROP TABLE ReservationEquipment;
+
+-- Reservations Table
+IF OBJECT_ID('Reservations', 'U') IS NOT NULL DROP TABLE Reservations;
+
+CREATE TABLE Reservations (
+    id UNIQUEIDENTIFIER PRIMARY KEY DEFAULT NEWID(),
+    checkout_date DATETIME DEFAULT GETDATE(),
+    return_date DATETIME NOT NULL,
+    event_venue VARCHAR(255) NOT NULL,
+    status VARCHAR(50) NOT NULL,
+    crew_id UNIQUEIDENTIFIER NOT NULL,
+    requires_holiday_pay BIT DEFAULT 0,
+    desk_closed_warning VARCHAR(255) NULL,
+    CONSTRAINT FK_Reservations_Crew FOREIGN KEY (crew_id) REFERENCES CrewMembers(id)
+);
+
+-- Recreate Combo Table
+CREATE TABLE ReservationEquipment (
         reservation_id UNIQUEIDENTIFIER NOT NULL,
         equipment_id UNIQUEIDENTIFIER NOT NULL,
         PRIMARY KEY (reservation_id, equipment_id),
         CONSTRAINT FK_ResEq_Reservation FOREIGN KEY (reservation_id) REFERENCES Reservations(id) ON DELETE CASCADE,
         CONSTRAINT FK_ResEq_Equipment FOREIGN KEY (equipment_id) REFERENCES Equipment(id) ON DELETE CASCADE
     );
-END
 `;
 
 export async function initializeDatabase() {
