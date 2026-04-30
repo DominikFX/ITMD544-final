@@ -192,38 +192,38 @@
 
     async function updateReservationStatus(id) {
       try {
-        const res = await fetch(\`/api/reservations/\${id}\`, {
-                    method: 'PUT',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ status: 'Completed' })
-                });
-                if (res.ok) {
-                    alert('Status updated to Completed!');
-                    loadData();
-                } else {
-                    alert('Failed to update status');
-                }
-            } catch (err) {
-                console.error(err);
-            }
+        const res = await fetch(`/api/reservations/${id}`, {
+            method: 'PUT',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ status: 'Completed' })
+        });
+        if (res.ok) {
+            alert('Status updated to Completed!');
+            loadData();
+        } else {
+            alert('Failed to update status');
         }
+      } catch (err) {
+          console.error(err);
+      }
+    }
 
-        async function deleteReservation(id) {
-            if (!confirm('Are you sure you want to delete this reservation?')) return;
-            try {
-                const res = await fetch(\`/api/reservations/\${id}\`, {
-                    method: 'DELETE'
-                });
-                if (res.ok) {
-                    alert('Reservation deleted!');
-                    loadData();
-                } else {
-                    alert('Failed to delete reservation');
-                }
-            } catch (err) {
-                console.error(err);
+    async function deleteReservation(id) {
+        if (!confirm('Are you sure you want to delete this reservation?')) return;
+        try {
+            const res = await fetch(`/api/reservations/${id}`, {
+                method: 'DELETE'
+            });
+            if (res.ok) {
+                alert('Reservation deleted!');
+                loadData();
+            } else {
+                alert('Failed to delete reservation');
             }
+        } catch (err) {
+            console.error(err);
         }
+    }
 
         async function resetDatabase() {
             if (!confirm('WARNING: This will wipe all current data and reset the database with default dummy data. Proceed?')) return;
