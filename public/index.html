@@ -148,10 +148,10 @@
         eqSelect.innerHTML = '<option value="">Select...</option>';
         data.equipment.forEach(eq => {
           eqList.innerHTML += `
-            <li>
+            <li id="eq-${eq.id}">
                 <strong>${eq.name}</strong> (${eq.sku}) - ${eq.is_available ? 'Available' : 'In Use'}
                 <br>
-                <button onclick="updateEquipment('${eq.id}')" style="margin-top:5px;">Edit</button>
+                <button onclick="editEquipment('${eq.id}', '${eq.name.replace(/'/g, "\\'")}', '${eq.category.replace(/'/g, "\\'")}', ${eq.is_available})" style="margin-top:5px;">Edit</button>
                 <button onclick="deleteEquipment('${eq.id}')" style="color:red; margin-top:5px;">Delete</button>
             </li>`;
           if (eq.is_available) {
@@ -166,10 +166,10 @@
         crewSelect.innerHTML = '<option value="">Select...</option>';
         data.crewMembers.forEach(crew => {
           crewList.innerHTML += `
-            <li>
+            <li id="crew-${crew.id}">
                 <strong>${crew.name}</strong> - ${crew.role}
                 <br>
-                <button onclick="updateCrew('${crew.id}')" style="margin-top:5px;">Edit</button>
+                <button onclick="editCrew('${crew.id}', '${crew.name.replace(/'/g, "\\'")}', '${crew.role.replace(/'/g, "\\'")}')" style="margin-top:5px;">Edit</button>
                 <button onclick="deleteCrew('${crew.id}')" style="color:red; margin-top:5px;">Delete</button>
             </li>`;
           crewSelect.innerHTML += `<option value="${crew.id}">${crew.name}</option>`;
@@ -249,11 +249,25 @@
       }
     }
 
+    function editCrew(id, name, role) {
+      const li = document.getElementById(`crew-${id}`);
+      li.innerHTML = `
+        <input type="text" id="crew-name-${id}" value="${name}" placeholder="Name" />
+        <input type="text" id="crew-role-${id}" value="${role}" placeholder="Role" />
+        <br>
+        <button onclick="updateCrew('${id}')" style="margin-top:5px;">Save</button>
+        <button onclick="loadData()" style="margin-top:5px;">Cancel</button>
+      `;
+    }
+
     async function updateCrew(id) {
-      const newName = prompt('Enter new name:');
-      if (!newName) return;
-      const newRole = prompt('Enter new role:');
-      if (!newRole) return;
+      const newName = document.getElementById(`crew-name-${id}`).value;
+      const newRole = document.getElementById(`crew-role-${id}`).value;
+      
+      if (!newName || !newRole) {
+        alert('Fields cannot be empty');
+        return;
+      }
 
       try {
         const res = await fetch(`/api/crew/${id}`, {
@@ -273,12 +287,27 @@
       } catch (e) { console.error(e); }
     }
 
+    function editEquipment(id, name, cat, isAvail) {
+      const li = document.getElementById(`eq-${id}`);
+      li.innerHTML = `
+        <input type="text" id="eq-name-${id}" value="${name}" placeholder="Name" />
+        <input type="text" id="eq-cat-${id}" value="${cat}" placeholder="Category" />
+        <label><input type="checkbox" id="eq-avail-${id}" ${isAvail ? 'checked' : ''} /> Available</label>
+        <br>
+        <button onclick="updateEquipment('${id}')" style="margin-top:5px;">Save</button>
+        <button onclick="loadData()" style="margin-top:5px;">Cancel</button>
+      `;
+    }
+
     async function updateEquipment(id) {
-      const newName = prompt('Enter new name:');
-      if (!newName) return;
-      const newCat = prompt('Enter new category:');
-      if (!newCat) return;
-      const isAvail = confirm('Is it available? (OK for yes, Cancel for no)');
+      const newName = document.getElementById(`eq-name-${id}`).value;
+      const newCat = document.getElementById(`eq-cat-${id}`).value;
+      const isAvail = document.getElementById(`eq-avail-${id}`).checked;
+
+      if (!newName || !newCat) {
+        alert('Fields cannot be empty');
+        return;
+      }
 
       try {
         const res = await fetch(`/api/equipment/${id}`, {
