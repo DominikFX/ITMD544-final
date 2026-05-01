@@ -10,6 +10,8 @@ import path from 'path';
 import restRouter from './routes/rest';
 import morgan from 'morgan';
 import { logger } from './utils/logger';
+import swaggerUi from 'swagger-ui-express';
+import YAML from 'yamljs';
 
 dotenv.config();
 
@@ -40,6 +42,7 @@ async function startServer() {
       links: {
         graphql_sandbox: '/graphql',
         rest_api_base: '/api',
+        swagger_docs: '/docs',
         frontend_client: '/client'
       }
     });
@@ -57,6 +60,10 @@ async function startServer() {
 
   // Mount standard REST endpoints
   app.use('/api', restRouter);
+
+  // Mount Swagger UI Documentation
+  const swaggerDocument = YAML.load(path.join(__dirname, '../openapi.yaml'));
+  app.use('/docs', swaggerUi.serve, swaggerUi.setup(swaggerDocument));
 
   app.use('/graphql', expressMiddleware(server));
 
