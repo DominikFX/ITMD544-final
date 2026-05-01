@@ -68,9 +68,32 @@ Data integrity is done using SQL constraints (Primary Keys, Foreign Keys, non-nu
 ## API Development
 The application has both a REST API and a GraphQL API. Both provide full CRUD functionality.
 
-- **REST API:** Available at `/api` (`/api/crew`, `/api/equipment`, `/api/reservations`).
-- **GraphQL API:** Available at `/graphql`.
-- **API Documentation:** Interactive Swagger/OpenAPI documentation is available at `/docs`, and GraphQL is available at `/graphql`.
+### REST API Endpoints
+- **Base/System Endpoints**
+  - `GET /` - API Status & Information
+  - `GET /docs` - Interactive Swagger UI Documentation
+  - `POST /api/reset` - Wipes the database and seeds it with default data
+- **Crew Members**
+  - `GET /api/crew` - Fetch all crew members
+  - `POST /api/crew` - Create a new crew member
+  - `PUT /api/crew/:id` - Update a crew member
+  - `DELETE /api/crew/:id` - Delete a crew member
+- **Equipment**
+  - `GET /api/equipment` - Fetch all equipment
+  - `POST /api/equipment` - Create a new equipment item
+  - `PUT /api/equipment/:id` - Update an equipment item
+  - `DELETE /api/equipment/:id` - Delete an equipment item
+- **Reservations**
+  - `GET /api/reservations` - Fetch all reservations
+  - `POST /api/reservations` - Create a new reservation
+  - `PUT /api/reservations/:id` - Update a reservation status
+  - `DELETE /api/reservations/:id` - Delete a reservation
+
+### GraphQL API Endpoint
+- **Endpoint:** `POST /graphql`
+- **Queries:** `crewMembers`, `equipment`, `reservations`, `reservation(id)`
+- **Edits:** `createCrewMember`, `createEquipment`, `createReservation`, `updateReservationStatus`, `cancelReservation`
+- **GraphQL:** Available by opening `http://localhost:4000/graphql` in a web browser.
 
 ## External API Integration
 The third party api that I used for this assignment was [Nager.Date API](https://date.nager.at/). 
@@ -112,17 +135,13 @@ A simple web page is included to demonstrate API usage.
    ```
    *If testing locally, replace the placeholders in the `.env` file with your Azure SQL credentials and add the IP to the SQL datbase server*
 
-4. **Initialize the Database:**
-   ```bash
-   npx ts-node src/db/init.ts
-   ```
-
-5. **Run the Server:**
+4. **Run the Server:**
    ```bash
    npm run dev
    ```
+   *The server will automatically initialize the database schema when it starts up*
 
-6. **Run the Test Suite:**
+5. **Run the Test Suite:**
    ```bash
    npm run test
    ```
