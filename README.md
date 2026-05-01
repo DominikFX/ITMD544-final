@@ -1,36 +1,32 @@
-# Professional A/V Equipment Vault API
-## ITMD544 - API Development Assignment
+# A/V Equipment Vault - Backend Development Final Project
 
-A backend GraphQL API for managing a professional audio/visual equipment vault. This project is the first part that will be used for the final assignment that is deployed to azure. This project focuses on cloud deployment, and direct database integration using Node.js and Azure SQL.
+**Live GraphQL API:** [itmd544final-b5fcg7aneggfenct.westus3-01.azurewebsites.net/graphql](https://itmd544final-b5fcg7aneggfenct.westus3-01.azurewebsites.net/graphql)  
+**Live REST API Docs:** [itmd544final-b5fcg7aneggfenct.westus3-01.azurewebsites.net/docs](https://itmd544final-b5fcg7aneggfenct.westus3-01.azurewebsites.net/docs)  
+**Live Frontend Demo:** [itmd544final-b5fcg7aneggfenct.westus3-01.azurewebsites.net/client](https://itmd544final-b5fcg7aneggfenct.westus3-01.azurewebsites.net/client)  
 
-**Live GraphQL API:** [itmd544final-b5fcg7aneggfenct.westus3-01.azurewebsites.net](itmd544final-b5fcg7aneggfenct.westus3-01.azurewebsites.net)  
-**GitHub Repository:** [https://github.com/DominikFX/ITMD544-final](https://github.com/DominikFX/ITMD544-final)
+A full backend system for managing professional audio/visual equipment vault for my final assignment for ITMD544.
 
-## Features & Implementation (Phases 1 & 3)
 
-This project combines Phase 1 (Database Integration) and Phase 3 (GraphQL API Implementation) requirements:
-- **Direct Database Access:** Utilizes the `mssql` (ADO.NET equivalent for Node.js) package to connect directly to an Azure SQL Serverless database without using an ORM.
-- **Relational Schema:** Implements a multi table relational structure with cross table relationships.
-- **GraphQL Engine:** Express and Apollo Server for a strongly-typed API.
-- **Limitations:** Implemented retry logic on database connections to handle since the free tier of Azure SQL Database needs time to "wake up".
-
-## Tech Stack
+## System Architecture & Tech Stack
+This Node.js application is deployed to an Azure Web App Service and communicates with an Azure SQL Database. 
 
 - **Runtime:** Node.js / TypeScript
-- **Server:** Express.js + Apollo Server 4
-- **Database:** Azure SQL Database (Serverless, Free Tier)
-- **Deployment:** Azure App Service (Web App) + Docker containerization
-- **Testing:** Jest + Supertest (Unit & Integration)
+- **Server:** Express.js & Apollo Server
+- **Database:** Azure SQL Database (Serverless)
+- **Deployment:** Azure App Service + GitHub Actions CI/CD
+- **Containerization:** Docker (Multi-stage `Dockerfile` included)
+- **Testing:** Jest + Supertest
 - **Logging:** Winston + Morgan
 
-## System Architecture & Database Schema
+## Database Design
+The system uses a Azure SQL database with 4 interconnected tables and complex relationships. It connects directly via the `mssql` ADO.NET equivalent package.
 
-The database consists of the following core tables:
+### Schema Details
 
 1. **CrewMembers**: Information regarding internal staff (ID, email, name, role).
 2. **Equipment**: Available A/V gear inventory (ID, sku, name, category, is_available).
 3. **Reservations**: Checkout and return dates mapped to a specific CrewMember and Event Venue.
-4. **ReservationEquipment**: A combo table linking multiple Equipment items to a single Reservation.
+4. **ReservationEquipment**: A combo/junction table linking multiple Equipment items to a single Reservation, creating a "many to many" relationship.
 
 ```mermaid
 erDiagram
@@ -67,32 +63,41 @@ erDiagram
     }
 ```
 
-## System Architecture
+Data integrity is done using SQL constraints (Primary Keys, Foreign Keys, non-null fields) and API validation.
 
-```mermaid
-graph TD
-    Client[Web Client UI] -->|HTTP/REST| REST[REST Router]
-    Client -->|GraphQL/POST| GQL[Apollo GraphQL Server]
+## API Development
+The application has both a REST API and a GraphQL API. Both provide full CRUD functionality.
 
-    REST --> Service[Service Layer]
-    GQL --> Service
+- **REST API:** Available at `/api` (`/api/crew`, `/api/equipment`, `/api/reservations`).
+- **GraphQL API:** Available at `/graphql`.
+- **API Documentation:** Interactive Swagger/OpenAPI documentation is available at `/docs`, and GraphQL is available at `/graphql`.
 
-    Service -->|Database Queries| SQL[(Azure SQL Serverless)]
-    Service -->|Fetch (External API Requirement)| ThirdParty[Nager.Date API]
+## External API Integration
+The third party api that I used for this assignment was [Nager.Date API](https://date.nager.at/). 
 
-    classDef db fill:#f9f,stroke:#333,stroke-width:2px;
-    class SQL db;
-```
+When a reservation is created, the system checks and return dates to the Nager.Date US Public Holidays endpoint. If the reservation falls on a recognized holiday, the API flags the database record as `requires_holiday_pay` and appends a `desk_closed_warning` string containing the name of the specific holiday.
 
-### External API Integration
-This application integrates the **Nager.Date API** to fulfill the external API requirement. When a reservation is created, the system checks the checkout and return dates against the US Public Holidays endpoint to flag whether holiday pay is required or if the checkout desk might be closed.
+## Frontend Demonstration
+A simple web page is included to demonstrate API usage.
+- Uses the endpont `/client`.
+- Uses basic HTML/JS to fetch data from the backend.
+- Demonstrates full CRUD capabilities, including inline form editing for Crew and Equipment, and features a "Reset Database" utility button to wipe and re-seed the tables with test data.
 
-## Local Setup Instructions
+## Technical Implementation Details
+- **Logging:** `winston` is configured for structured application logging, along with `morgan` to log all incoming HTTP requests automatically.
+- **Testing:** Unit and integration testing is handled by `jest` and `supertest`, which verify the REST API routes.
+- **CI/CD:** A GitHub Actions workflow (`.github/workflows/main_itmd544final.yml`) runs on every push to `main`. It automatically installs dependencies, runs the `jest` test suite, builds the TypeScript code, and deploys the artifact to Azure App Service.
+- **Containerization:** A `Dockerfile` and `.dockerignore` are included in the root directory for standard containerized deployment.
+
+
+## Setup and Installation Instructions
+
+### Local Development Environment
 
 1. **Clone the repository:**
    ```bash
-   git clone https://github.com/DominikFX/ITMD544-api-dev.git
-   cd ITMD544-api-dev
+   git clone https://github.com/DominikFX/ITMD544-final.git
+   cd ITMD544-final
    ```
 
 2. **Install Dependencies:**
@@ -101,95 +106,39 @@ This application integrates the **Nager.Date API** to fulfill the external API r
    ```
 
 3. **Configure the Environment:**
-   Create a `.env` file in the root of the project using the `.env.example` template:
+   Create a `.env` file in the root of the project:
    ```bash
    cp .env.example .env
    ```
-   *Replace the placeholders in the `.env` file with your actual Azure SQL credentials.*
-
-   > **Note:** Because the database is hosted on Azure SQL, ensure that your current local IP address is whitelisted in the Azure Portal Firewall settings, or your connection will time out.
+   *If testing locally, replace the placeholders in the `.env` file with your Azure SQL credentials and add the IP to the SQL datbase server*
 
 4. **Initialize the Database:**
-   If the database is empty, run the initialization script to generate the tables:
    ```bash
    npx ts-node src/db/init.ts
    ```
 
-5. **Run the Development Server:**
+5. **Run the Server:**
    ```bash
    npm run dev
    ```
-   The API and Apollo Sandbox will be available at `http://localhost:4000/graphql`.
 
-6. **Run Tests:**
-   The project includes integration tests using Jest and Supertest.
+6. **Run the Test Suite:**
    ```bash
    npm run test
    ```
 
-## API Usage Examples
-
-You can execute queries directly in the Apollo Sandbox UI at the link above.
-
-### 1. Create a Crew Member (Mutation)
-```graphql
-mutation {
-  createCrewMember(email: "dom@example.com", name: "Dom", role: "Manager") {
-    id
-    name
-    email
-  }
-}
-```
-
-### 2. View Inventory (Query)
-```graphql
-query {
-  equipment {
-    id
-    sku
-    name
-    category
-  }
-}
-```
-
-### 3. Create a Reservation
-*(Requires existing `crew_id` and `equipment_ids`)*
-```graphql
-mutation {
-  createReservation(
-    return_date: "2026-05-10T12:00:00Z",
-    event_venue: "Main Stage",
-    status: "Pending",
-    crew_id: "CREW_ID",
-    equipment_ids: ["EQUIPMENT_ID"]
-  ) {
-    id
-    checkout_date
-    status
-    crew_member {
-      name
-    }
-    equipment {
-      name
-    }
-  }
-}
-```
-
-## Deployment Instructions (Azure)
-
-This application is configured for Continuous Deployment via GitHub Actions or Azure Deployment Center.
+### Deployment Instructions
+This application is configured for Continuous Deployment via GitHub Actions.
 1. Create a Node.js Web App in Azure App Service.
-2. Link the repository via the Deployment Center.
-3. Under the Web App's **Configuration -> Application settings**, add the `DB_CONNECTION_STRING` variable containing the Azure SQL Serverless credentials.
-4. Set the Startup Command to `npm start` (which runs `node dist/index.js`). Note that you may need to add a build step (`npm run build`) in your CI/CD pipeline if deploying TypeScript directly.
+2. **Configuration -> Application settings**, add your `DB_CONNECTION_STRING`.
+3. Link the repository via the Deployment Center, and GitHub Actions will automatically handle testing, building, and deploying.
 
-### Docker Containerization
-To fulfill the containerization requirement, a multi-stage `Dockerfile` is included at the root of the repository. While this repository uses GitHub Actions to deploy directly to Azure App Service as a Node Web App, you can alternatively build and run the Docker image:
-
+You can also build and run the Docker container locally:
 ```bash
 docker build -t av-manager-api .
 docker run -p 4000:4000 --env-file .env av-manager-api
 ```
+
+## Future Improvement Suggestions
+- **Authentication/Authorization:** Implement authentication tokens to restrict access to specific operations (for ex: only Managers can delete equipment).
+- **Better UI** Create a more user-friendly interface for the frontend and backend, including proper error handling and user feedback.
