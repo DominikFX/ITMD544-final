@@ -8,18 +8,25 @@ import dotenv from 'dotenv';
 import { initializeDatabase } from './db/init';
 import path from 'path';
 import restRouter from './routes/rest';
+import morgan from 'morgan';
+import { logger } from './utils/logger';
 
 dotenv.config();
 
+export const app = express();
+
 async function startServer() {
-  const app = express();
 
   try {
     await initializeDatabase();
+    logger.info('Database initialized successfully');
   } catch (err) {
-    console.error('Failed to start server due to database connection error:', err);
+    logger.error(`Failed to start server due to database connection error: ${(err as any).message}`);
     process.exit(1);
   }
+
+  // Setup HTTP request logging via Morgan, piping stream to Winston
+  app.use(morgan('combined', { stream: { write: (message) => logger.info(message.trim()) } }));
 
   // Serve static frontend files under /client
   app.use('/client', express.static(path.join(__dirname, '../public')));
@@ -55,8 +62,12 @@ async function startServer() {
 
   const PORT = process.env.PORT || 4000;
   app.listen(PORT, () => {
-    console.log(`Server ready at http://localhost:${PORT}/graphql`);
+    logger.info(`Server ready at http://localhost:${PORT}/graphql`);
   });
 }
 
-startServer();
+}
+
+if (require.main === module) {
+  startServer();
+}

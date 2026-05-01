@@ -19,7 +19,9 @@ This project combines Phase 1 (Database Integration) and Phase 3 (GraphQL API Im
 - **Runtime:** Node.js / TypeScript
 - **Server:** Express.js + Apollo Server 4
 - **Database:** Azure SQL Database (Serverless, Free Tier)
-- **Deployment:** Azure App Service (Web App)
+- **Deployment:** Azure App Service (Web App) + Docker containerization
+- **Testing:** Jest + Supertest (Unit & Integration)
+- **Logging:** Winston + Morgan
 
 ## System Architecture & Database Schema
 
@@ -76,11 +78,14 @@ graph TD
     GQL --> Service
 
     Service -->|Database Queries| SQL[(Azure SQL Serverless)]
-    Service -->|Fetch| ThirdParty[Nager.Date API]
+    Service -->|Fetch (External API Requirement)| ThirdParty[Nager.Date API]
 
     classDef db fill:#f9f,stroke:#333,stroke-width:2px;
     class SQL db;
 ```
+
+### External API Integration
+This application integrates the **Nager.Date API** to fulfill the external API requirement. When a reservation is created, the system checks the checkout and return dates against the US Public Holidays endpoint to flag whether holiday pay is required or if the checkout desk might be closed.
 
 ## Local Setup Instructions
 
@@ -115,6 +120,12 @@ graph TD
    npm run dev
    ```
    The API and Apollo Sandbox will be available at `http://localhost:4000/graphql`.
+
+6. **Run Tests:**
+   The project includes integration tests using Jest and Supertest.
+   ```bash
+   npm run test
+   ```
 
 ## API Usage Examples
 
@@ -174,3 +185,11 @@ This application is configured for Continuous Deployment via GitHub Actions or A
 2. Link the repository via the Deployment Center.
 3. Under the Web App's **Configuration -> Application settings**, add the `DB_CONNECTION_STRING` variable containing the Azure SQL Serverless credentials.
 4. Set the Startup Command to `npm start` (which runs `node dist/index.js`). Note that you may need to add a build step (`npm run build`) in your CI/CD pipeline if deploying TypeScript directly.
+
+### Docker Containerization
+To fulfill the containerization requirement, a multi-stage `Dockerfile` is included at the root of the repository. While this repository uses GitHub Actions to deploy directly to Azure App Service as a Node Web App, you can alternatively build and run the Docker image:
+
+```bash
+docker build -t av-manager-api .
+docker run -p 4000:4000 --env-file .env av-manager-api
+```
