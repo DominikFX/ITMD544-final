@@ -104,11 +104,25 @@
     <div class="section">
       <h2>Equipment</h2>
       <ul id="equipment-list"></ul>
+      <h4>Add Equipment</h4>
+      <div class="form-group" style="display:flex; gap:5px;">
+        <input type="text" id="new-eq-name" placeholder="Name" style="width: 80px;" />
+        <input type="text" id="new-eq-sku" placeholder="SKU" style="width: 80px;" />
+        <input type="text" id="new-eq-cat" placeholder="Category" style="width: 80px;" />
+        <button onclick="createEquipment()">Add</button>
+      </div>
     </div>
 
     <div class="section">
       <h2>Crew</h2>
       <ul id="crew-list"></ul>
+      <h4>Add Crew Member</h4>
+      <div class="form-group" style="display:flex; gap:5px;">
+        <input type="text" id="new-crew-name" placeholder="Name" style="width: 80px;" />
+        <input type="text" id="new-crew-email" placeholder="Email" style="width: 80px;" />
+        <input type="text" id="new-crew-role" placeholder="Role" style="width: 80px;" />
+        <button onclick="createCrew()">Add</button>
+      </div>
     </div>
   </div>
 
@@ -260,6 +274,33 @@
       `;
     }
 
+    async function createCrew() {
+      const name = document.getElementById('new-crew-name').value;
+      const email = document.getElementById('new-crew-email').value;
+      const role = document.getElementById('new-crew-role').value;
+      
+      if (!name || !email || !role) {
+        alert('All fields required');
+        return;
+      }
+
+      try {
+        const res = await fetch(`/api/crew`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ name, email, role })
+        });
+        if (res.ok) {
+          document.getElementById('new-crew-name').value = '';
+          document.getElementById('new-crew-email').value = '';
+          document.getElementById('new-crew-role').value = '';
+          loadData();
+        } else {
+          alert('Failed to add crew member');
+        }
+      } catch (e) { console.error(e); }
+    }
+
     async function updateCrew(id) {
       const newName = document.getElementById(`crew-name-${id}`).value;
       const newRole = document.getElementById(`crew-role-${id}`).value;
@@ -297,6 +338,33 @@
         <button onclick="updateEquipment('${id}')" style="margin-top:5px;">Save</button>
         <button onclick="loadData()" style="margin-top:5px;">Cancel</button>
       `;
+    }
+
+    async function createEquipment() {
+      const name = document.getElementById('new-eq-name').value;
+      const sku = document.getElementById('new-eq-sku').value;
+      const category = document.getElementById('new-eq-cat').value;
+      
+      if (!name || !sku || !category) {
+        alert('All fields required');
+        return;
+      }
+
+      try {
+        const res = await fetch(`/api/equipment`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ name, sku, category, is_available: true })
+        });
+        if (res.ok) {
+          document.getElementById('new-eq-name').value = '';
+          document.getElementById('new-eq-sku').value = '';
+          document.getElementById('new-eq-cat').value = '';
+          loadData();
+        } else {
+          alert('Failed to add equipment');
+        }
+      } catch (e) { console.error(e); }
     }
 
     async function updateEquipment(id) {
